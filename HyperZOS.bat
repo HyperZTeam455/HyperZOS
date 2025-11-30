@@ -453,7 +453,7 @@ echo ================================================================ >> "%EXPOR
 echo Export complete!
 echo File saved to: %EXPORT_FILE%
 echo.
-echo Press any key to open the file...
+echo. Press any key to continue.
 pause >nul
 notepad "%EXPORT_FILE%"
 goto network_scanner
@@ -2079,3 +2079,4 @@ cls
 echo Shutting down HyperZOS...
 timeout /t 1 >nul
 exit /b
+
