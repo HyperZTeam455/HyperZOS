@@ -1,5 +1,5 @@
 @echo off
-title HyperZOS v0.0.9
+title HyperZOS v0.1.0
 color 0a
 mode con: cols=110 lines=30
 setlocal enabledelayedexpansion
@@ -12,7 +12,7 @@ echo ================================================================
 echo                       H Y P E R Z O S
 echo ================================================================
 echo.
-echo                       Version 0.0.9
+echo                       Version 0.1.0
 echo.
 echo             Loading HyperZOS Operating System...
 echo.
@@ -37,7 +37,7 @@ if not exist "%ROOT%" (
     mkdir "%ROOT%\Documents"
     mkdir "%ROOT%\Programs"
     mkdir "%ROOT%\Themes"
-    echo Welcome to HyperZOS v0.0.9 > "%ROOT%\Documents\welcome.txt"
+    echo Welcome to HyperZOS v0.1.0 > "%ROOT%\Documents\welcome.txt"
     echo 0a > "%ROOT%\Themes\current.txt"
 )
 
@@ -56,18 +56,19 @@ set opts[1]=Games
 set opts[2]=HyperZShell
 set opts[3]=HyperZPad
 set opts[4]=Network Scanner
-set opts[5]=Themes
-set opts[6]=Exit HyperZOS
+set opts[5]=HyperZDecimal
+set opts[6]=Themes
+set opts[7]=Exit HyperZOS
 
 :menu
 cls
 echo ================================================================
 echo                     HyperZOS Operating System
-echo            Version 0.0.9 - %date% - %time%
+echo            Version 0.1.0 - %date% - %time%
 echo ================================================================
 echo.
 rem Draw menu with highlight
-for /L %%i in (0,1,6) do (
+for /L %%i in (0,1,7) do (
     if !sel! EQU %%i (
         echo  ^>^> !opts[%%i]!
     ) else (
@@ -81,9 +82,9 @@ rem Read key from PowerShell - optimized version
 for /f %%K in ('powershell -noprofile -command "$k=$host.ui.rawui.readkey('NoEcho,IncludeKeyDown');$k.virtualkeycode"') do set key=%%K
 
 if "%key%"=="38" set /a sel-=1
-if !sel! LSS 0 set sel=6
+if !sel! LSS 0 set sel=7
 if "%key%"=="40" set /a sel+=1
-if !sel! GTR 6 set sel=0
+if !sel! GTR 7 set sel=0
 if "%key%"=="13" goto select_option
 
 goto menu
@@ -94,8 +95,9 @@ if !sel! EQU 1 goto games_menu
 if !sel! EQU 2 goto run_hyperzshell
 if !sel! EQU 3 goto hyperzpad
 if !sel! EQU 4 goto network_scanner
-if !sel! EQU 5 goto themes
-if !sel! EQU 6 goto exitos
+if !sel! EQU 5 goto hyperzDecimal
+if !sel! EQU 6 goto themes
+if !sel! EQU 7 goto exitos
 goto menu
 
 rem ===========================
@@ -457,6 +459,296 @@ echo. Press any key to continue.
 pause >nul
 notepad "%EXPORT_FILE%"
 goto network_scanner
+
+rem ===========================
+rem HyperZDecimal Encoder/Decoder
+rem ===========================
+:hyperzDecimal
+cls
+echo ================================================================
+echo                      HyperZDecimal
+echo              Morse Code Encryption System
+echo ================================================================
+echo.
+echo 1. Encode Text to HyperZDecimal
+echo 2. Decode HyperZDecimal to Text
+echo 3. Back to Main Menu
+echo.
+set /p hzd_choice=Select option (1-3): 
+
+if "%hzd_choice%"=="1" goto hzd_encoder
+if "%hzd_choice%"=="2" goto hzd_decoder
+if "%hzd_choice%"=="3" goto menu
+goto hyperzDecimal
+
+rem ===========================
+rem HyperZDecimal Encoder
+rem ===========================
+:hzd_encoder
+cls
+echo ================================================================
+echo                 HyperZDecimal Encoder
+echo ================================================================
+echo.
+set /p "input=Enter text to encode (or 'back' to return): "
+
+if /i "!input!"=="back" goto hyperzDecimal
+if "!input!"=="" goto hzd_encoder
+
+:: Frame marker
+set FRAME=88888
+
+:: Initialize final_text with starting frame
+set "final_text=%FRAME%"
+
+:: Add each character with random number
+set i=0
+:hzd_enc_loop
+set "ch=!input:~%i%,1!"
+if "!ch!"=="" goto hzd_add_end_frame
+
+:: Convert to uppercase (preserve case)
+set "ch_upper=!ch!"
+if "!ch!"=="a" set "ch_upper=A"
+if "!ch!"=="b" set "ch_upper=B"
+if "!ch!"=="c" set "ch_upper=C"
+if "!ch!"=="d" set "ch_upper=D"
+if "!ch!"=="e" set "ch_upper=E"
+if "!ch!"=="f" set "ch_upper=F"
+if "!ch!"=="g" set "ch_upper=G"
+if "!ch!"=="h" set "ch_upper=H"
+if "!ch!"=="i" set "ch_upper=I"
+if "!ch!"=="j" set "ch_upper=J"
+if "!ch!"=="k" set "ch_upper=K"
+if "!ch!"=="l" set "ch_upper=L"
+if "!ch!"=="m" set "ch_upper=M"
+if "!ch!"=="n" set "ch_upper=N"
+if "!ch!"=="o" set "ch_upper=O"
+if "!ch!"=="p" set "ch_upper=P"
+if "!ch!"=="q" set "ch_upper=Q"
+if "!ch!"=="r" set "ch_upper=R"
+if "!ch!"=="s" set "ch_upper=S"
+if "!ch!"=="t" set "ch_upper=T"
+if "!ch!"=="u" set "ch_upper=U"
+if "!ch!"=="v" set "ch_upper=V"
+if "!ch!"=="w" set "ch_upper=W"
+if "!ch!"=="x" set "ch_upper=X"
+if "!ch!"=="y" set "ch_upper=Y"
+if "!ch!"=="z" set "ch_upper=Z"
+
+:: Add random number
+set /a rnd=!random! %% 10
+set "final_text=!final_text!!ch_upper!!rnd!"
+set /a i+=1
+goto hzd_enc_loop
+
+:hzd_add_end_frame
+:: Add ending frame marker
+set "final_text=!final_text!!FRAME!"
+
+:: Convert to Morse inline
+set "output="
+set i=0
+:hzd_convert
+set "c=!final_text:~%i%,1!"
+if "!c!"=="" goto hzd_done_convert
+
+:: Letters
+if /i "!c!"=="A" set "morse=.-"
+if /i "!c!"=="B" set "morse=-..."
+if /i "!c!"=="C" set "morse=-.-."
+if /i "!c!"=="D" set "morse=-.."
+if /i "!c!"=="E" set "morse=."
+if /i "!c!"=="F" set "morse=..-."
+if /i "!c!"=="G" set "morse=--."
+if /i "!c!"=="H" set "morse=...."
+if /i "!c!"=="I" set "morse=.."
+if /i "!c!"=="J" set "morse=.---"
+if /i "!c!"=="K" set "morse=-.-"
+if /i "!c!"=="L" set "morse=.-.."
+if /i "!c!"=="M" set "morse=--"
+if /i "!c!"=="N" set "morse=-."
+if /i "!c!"=="O" set "morse=---"
+if /i "!c!"=="P" set "morse=.--."
+if /i "!c!"=="Q" set "morse=--.-"
+if /i "!c!"=="R" set "morse=.-."
+if /i "!c!"=="S" set "morse=..."
+if /i "!c!"=="T" set "morse=-"
+if /i "!c!"=="U" set "morse=..-"
+if /i "!c!"=="V" set "morse=...-"
+if /i "!c!"=="W" set "morse=.--"
+if /i "!c!"=="X" set "morse=-..-"
+if /i "!c!"=="Y" set "morse=-.--"
+if /i "!c!"=="Z" set "morse=--.."
+
+:: Numbers
+if "!c!"=="0" set "morse=-----"
+if "!c!"=="1" set "morse=.----"
+if "!c!"=="2" set "morse=..---"
+if "!c!"=="3" set "morse=...--"
+if "!c!"=="4" set "morse=....-"
+if "!c!"=="5" set "morse=....."
+if "!c!"=="6" set "morse=-...."
+if "!c!"=="7" set "morse=--..."
+if "!c!"=="8" set "morse=---.."
+if "!c!"=="9" set "morse=----."
+
+:: Append to output
+set "output=!output!!morse! "
+set /a i+=1
+goto hzd_convert
+
+:hzd_done_convert
+cls
+echo ================================================================
+echo                 HyperZDecimal Encoder
+echo ================================================================
+echo.
+echo Original Text:
+echo !input!
+echo.
+echo ================================================================
+echo Encoded HyperZDecimal (Morse):
+echo ================================================================
+echo !output!
+echo.
+echo ================================================================
+echo.
+echo Options:
+echo 1. Save to file
+echo 2. Encode another message
+echo 3. Back to HyperZDecimal menu
+echo.
+set /p enc_action=Select option: 
+
+if "%enc_action%"=="1" goto hzd_save_encoded
+if "%enc_action%"=="2" goto hzd_encoder
+if "%enc_action%"=="3" goto hyperzDecimal
+goto hzd_done_convert
+
+:hzd_save_encoded
+set "ENC_FILE=%ROOT%\Documents\HyperZEncoded_%date:~-4%%date:~4,2%%date:~7,2%_%time:~0,2%%time:~3,2%%time:~6,2%.txt"
+set "ENC_FILE=%ENC_FILE: =0%"
+echo !output! > "%ENC_FILE%"
+echo.
+echo Encoded message saved to:
+echo %ENC_FILE%
+echo.
+pause
+goto hzd_encoder
+
+rem ===========================
+rem HyperZDecimal Decoder
+rem ===========================
+:hzd_decoder
+cls
+echo ================================================================
+echo                 HyperZDecimal Decoder
+echo ================================================================
+echo.
+echo Enter HyperZDecimal Morse code (or 'back' to return):
+echo (Paste the encoded morse string)
+echo.
+set /p "input="
+
+if /i "!input!"=="back" goto hyperzDecimal
+if "!input!"=="" goto hzd_decoder
+
+:: Initialize decoded string
+set "decoded="
+
+:: Split input by spaces into tokens
+for %%A in (!input!) do (
+    set "token=%%A"
+    
+    :: Skip frame marker (8 in morse = ---..)
+    if "!token!"=="---.." set "token="
+    
+    if defined token (
+        set "char="
+        
+        :: Letters
+        if "!token!"==".-" set "char=A"
+        if "!token!"=="-..." set "char=B"
+        if "!token!"=="-.-." set "char=C"
+        if "!token!"=="-.." set "char=D"
+        if "!token!"=="." set "char=E"
+        if "!token!"=="..-." set "char=F"
+        if "!token!"=="--." set "char=G"
+        if "!token!"=="...." set "char=H"
+        if "!token!"==".." set "char=I"
+        if "!token!"==".---" set "char=J"
+        if "!token!"=="-.-" set "char=K"
+        if "!token!"==".-.." set "char=L"
+        if "!token!"=="--" set "char=M"
+        if "!token!"=="-." set "char=N"
+        if "!token!"=="---" set "char=O"
+        if "!token!"==".--." set "char=P"
+        if "!token!"=="--.-" set "char=Q"
+        if "!token!"==".-." set "char=R"
+        if "!token!"=="..." set "char=S"
+        if "!token!"=="-" set "char=T"
+        if "!token!"=="..-" set "char=U"
+        if "!token!"=="...-" set "char=V"
+        if "!token!"==".--" set "char=W"
+        if "!token!"=="-..-" set "char=X"
+        if "!token!"=="-.--" set "char=Y"
+        if "!token!"=="--.." set "char=Z"
+        
+        :: Numbers
+        if "!token!"=="-----" set "char=0"
+        if "!token!"==".----" set "char=1"
+        if "!token!"=="..---" set "char=2"
+        if "!token!"=="...--" set "char=3"
+        if "!token!"=="....-" set "char=4"
+        if "!token!"=="....." set "char=5"
+        if "!token!"=="-...." set "char=6"
+        if "!token!"=="--..." set "char=7"
+        if "!token!"=="---.." set "char=8"
+        if "!token!"=="----." set "char=9"
+        
+        set "decoded=!decoded!!char!"
+    )
+)
+
+:: Remove only random numbers (keep letters)
+set "original="
+set len=0
+:hzd_strip_loop
+set "c=!decoded:~%len%,1!"
+if "!c!"=="" goto hzd_done_strip
+
+for %%L in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
+    if /i "!c!"=="%%L" set "original=!original!!c!"
+)
+set /a len+=1
+goto hzd_strip_loop
+
+:hzd_done_strip
+cls
+echo ================================================================
+echo                 HyperZDecimal Decoder
+echo ================================================================
+echo.
+echo Encoded Input:
+echo !input!
+echo.
+echo ================================================================
+echo Decoded Text:
+echo ================================================================
+echo !original!
+echo.
+echo ================================================================
+echo.
+echo Options:
+echo 1. Decode another message
+echo 2. Back to HyperZDecimal menu
+echo.
+set /p dec_action=Select option: 
+
+if "%dec_action%"=="1" goto hzd_decoder
+if "%dec_action%"=="2" goto hyperzDecimal
+goto hzd_done_strip
 
 rem ===========================
 rem File Manager
@@ -2079,4 +2371,3 @@ cls
 echo Shutting down HyperZOS...
 timeout /t 1 >nul
 exit /b
-
