@@ -1,5 +1,5 @@
 @echo off
-title HyperZOS v0.0.8
+title HyperZOS v0.0.9
 color 0a
 mode con: cols=110 lines=30
 setlocal enabledelayedexpansion
@@ -12,7 +12,7 @@ echo ================================================================
 echo                       H Y P E R Z O S
 echo ================================================================
 echo.
-echo                       Version 0.0.8
+echo                       Version 0.0.9
 echo.
 echo             Loading HyperZOS Operating System...
 echo.
@@ -37,7 +37,7 @@ if not exist "%ROOT%" (
     mkdir "%ROOT%\Documents"
     mkdir "%ROOT%\Programs"
     mkdir "%ROOT%\Themes"
-    echo Welcome to HyperZOS v0.0.8 > "%ROOT%\Documents\welcome.txt"
+    echo Welcome to HyperZOS v0.0.9 > "%ROOT%\Documents\welcome.txt"
     echo 0a > "%ROOT%\Themes\current.txt"
 )
 
@@ -55,18 +55,19 @@ set opts[0]=File Manager
 set opts[1]=Games
 set opts[2]=HyperZShell
 set opts[3]=HyperZPad
-set opts[4]=Themes
-set opts[5]=Exit HyperZOS
+set opts[4]=Network Scanner
+set opts[5]=Themes
+set opts[6]=Exit HyperZOS
 
 :menu
 cls
 echo ================================================================
 echo                     HyperZOS Operating System
-echo            Version 0.0.8 - %date% - %time%
+echo            Version 0.0.9 - %date% - %time%
 echo ================================================================
 echo.
 rem Draw menu with highlight
-for /L %%i in (0,1,5) do (
+for /L %%i in (0,1,6) do (
     if !sel! EQU %%i (
         echo  ^>^> !opts[%%i]!
     ) else (
@@ -80,9 +81,9 @@ rem Read key from PowerShell - optimized version
 for /f %%K in ('powershell -noprofile -command "$k=$host.ui.rawui.readkey('NoEcho,IncludeKeyDown');$k.virtualkeycode"') do set key=%%K
 
 if "%key%"=="38" set /a sel-=1
-if !sel! LSS 0 set sel=5
+if !sel! LSS 0 set sel=6
 if "%key%"=="40" set /a sel+=1
-if !sel! GTR 5 set sel=0
+if !sel! GTR 6 set sel=0
 if "%key%"=="13" goto select_option
 
 goto menu
@@ -92,8 +93,9 @@ if !sel! EQU 0 goto fileman
 if !sel! EQU 1 goto games_menu
 if !sel! EQU 2 goto run_hyperzshell
 if !sel! EQU 3 goto hyperzpad
-if !sel! EQU 4 goto themes
-if !sel! EQU 5 goto exitos
+if !sel! EQU 4 goto network_scanner
+if !sel! EQU 5 goto themes
+if !sel! EQU 6 goto exitos
 goto menu
 
 rem ===========================
@@ -176,6 +178,285 @@ echo.
 echo Theme applied and saved!
 timeout /t 2 >nul
 goto menu
+rem ===========================
+rem Network Scanner
+rem ===========================
+:network_scanner
+cls
+echo ================================================================
+echo                      Network Scanner
+echo ================================================================
+echo.
+echo 1. Quick Scan (Hostname + IP Config)
+echo 2. Full Network Scan (All Commands)
+echo 3. Ping Test (8.8.8.8)
+echo 4. ARP Table
+echo 5. NetBIOS Status
+echo 6. MAC Address
+echo 7. Network Statistics
+echo 8. Export Results to File
+echo 9. Back to Main Menu
+echo.
+set /p netscan_choice=Select option (1-9): 
+
+if "%netscan_choice%"=="1" goto netscan_quick
+if "%netscan_choice%"=="2" goto netscan_full
+if "%netscan_choice%"=="3" goto netscan_ping
+if "%netscan_choice%"=="4" goto netscan_arp
+if "%netscan_choice%"=="5" goto netscan_nbtstat
+if "%netscan_choice%"=="6" goto netscan_mac
+if "%netscan_choice%"=="7" goto netscan_netstat
+if "%netscan_choice%"=="8" goto netscan_export
+if "%netscan_choice%"=="9" goto menu
+goto network_scanner
+
+:netscan_quick
+cls
+echo ================================================================
+echo                      Quick Network Scan
+echo ================================================================
+echo.
+echo [*] Retrieving Hostname...
+echo.
+hostname
+echo.
+echo ================================================================
+echo [*] IP Configuration:
+echo ================================================================
+echo.
+ipconfig | findstr /i "IPv4 Subnet Gateway"
+echo.
+echo ================================================================
+echo Press any key to return...
+pause >nul
+goto network_scanner
+
+:netscan_full
+cls
+echo ================================================================
+echo                   Full Network Scan
+echo ================================================================
+echo.
+echo [1/7] Getting Hostname...
+echo ================================================================
+hostname
+echo.
+timeout /t 2 >nul
+
+echo [2/7] IP Configuration...
+echo ================================================================
+ipconfig /all
+echo.
+timeout /t 2 >nul
+
+echo [3/7] Pinging Google DNS (8.8.8.8)...
+echo ================================================================
+ping 8.8.8.8 -n 4
+echo.
+timeout /t 2 >nul
+
+echo [4/7] ARP Cache Table...
+echo ================================================================
+arp -a
+echo.
+timeout /t 2 >nul
+
+echo [5/7] NetBIOS Status...
+echo ================================================================
+nbtstat -n
+echo.
+timeout /t 2 >nul
+
+echo [6/7] MAC Address...
+echo ================================================================
+getmac /v
+echo.
+timeout /t 2 >nul
+
+echo [7/7] Network Statistics...
+echo ================================================================
+netstat -e
+echo.
+echo ================================================================
+echo Scan Complete!
+echo ================================================================
+pause
+goto network_scanner
+
+:netscan_ping
+cls
+echo ================================================================
+echo                   Ping Test - 8.8.8.8
+echo ================================================================
+echo.
+echo Testing connection to Google DNS...
+echo.
+ping 8.8.8.8 -n 10
+echo.
+echo ================================================================
+pause
+goto network_scanner
+
+:netscan_arp
+cls
+echo ================================================================
+echo                      ARP Table
+echo ================================================================
+echo.
+echo Displaying Address Resolution Protocol cache...
+echo.
+arp -a
+echo.
+echo ================================================================
+pause
+goto network_scanner
+
+:netscan_nbtstat
+cls
+echo ================================================================
+echo                   NetBIOS Status
+echo ================================================================
+echo.
+echo Local NetBIOS Name Table:
+echo.
+nbtstat -n
+echo.
+echo ================================================================
+echo.
+echo Do you want to query a remote computer? (Y/N)
+set /p nbt_remote=
+if /i "%nbt_remote%"=="Y" (
+    echo.
+    set /p remote_ip=Enter IP address or computer name: 
+    echo.
+    echo Querying !remote_ip!...
+    echo.
+    nbtstat -A !remote_ip! 2>nul
+    if errorlevel 1 nbtstat -a !remote_ip!
+    echo.
+)
+echo ================================================================
+pause
+goto network_scanner
+
+:netscan_mac
+cls
+echo ================================================================
+echo                    MAC Addresses
+echo ================================================================
+echo.
+getmac /v /fo table
+echo.
+echo ================================================================
+pause
+goto network_scanner
+
+:netscan_netstat
+cls
+echo ================================================================
+echo                  Network Statistics
+echo ================================================================
+echo.
+echo 1. Active Connections
+echo 2. Ethernet Statistics
+echo 3. Routing Table
+echo 4. Listening Ports
+echo 5. Back
+echo.
+set /p netstat_opt=Select option (1-5): 
+
+if "%netstat_opt%"=="1" (
+    cls
+    echo Active Connections:
+    echo ================================================================
+    netstat -an | more
+    pause
+    goto netscan_netstat
+)
+if "%netstat_opt%"=="2" (
+    cls
+    echo Ethernet Statistics:
+    echo ================================================================
+    netstat -e
+    pause
+    goto netscan_netstat
+)
+if "%netstat_opt%"=="3" (
+    cls
+    echo Routing Table:
+    echo ================================================================
+    netstat -r | more
+    pause
+    goto netscan_netstat
+)
+if "%netstat_opt%"=="4" (
+    cls
+    echo Listening Ports:
+    echo ================================================================
+    netstat -an | findstr "LISTENING"
+    pause
+    goto netscan_netstat
+)
+if "%netstat_opt%"=="5" goto network_scanner
+goto netscan_netstat
+
+:netscan_export
+cls
+echo ================================================================
+echo                   Export Scan Results
+echo ================================================================
+echo.
+echo Exporting network scan to file...
+echo.
+
+set "EXPORT_FILE=%ROOT%\Documents\NetworkScan_%date:~-4%%date:~4,2%%date:~7,2%_%time:~0,2%%time:~3,2%%time:~6,2%.txt"
+set "EXPORT_FILE=%EXPORT_FILE: =0%"
+
+echo ================================================================ > "%EXPORT_FILE%"
+echo           HyperZOS Network Scan Report >> "%EXPORT_FILE%"
+echo                 %date% %time% >> "%EXPORT_FILE%"
+echo ================================================================ >> "%EXPORT_FILE%"
+echo. >> "%EXPORT_FILE%"
+
+echo [*] Hostname: >> "%EXPORT_FILE%"
+hostname >> "%EXPORT_FILE%"
+echo. >> "%EXPORT_FILE%"
+
+echo [*] IP Configuration: >> "%EXPORT_FILE%"
+ipconfig /all >> "%EXPORT_FILE%"
+echo. >> "%EXPORT_FILE%"
+
+echo [*] Ping Test (8.8.8.8): >> "%EXPORT_FILE%"
+ping 8.8.8.8 -n 4 >> "%EXPORT_FILE%"
+echo. >> "%EXPORT_FILE%"
+
+echo [*] ARP Cache: >> "%EXPORT_FILE%"
+arp -a >> "%EXPORT_FILE%"
+echo. >> "%EXPORT_FILE%"
+
+echo [*] NetBIOS: >> "%EXPORT_FILE%"
+nbtstat -n >> "%EXPORT_FILE%"
+echo. >> "%EXPORT_FILE%"
+
+echo [*] MAC Addresses: >> "%EXPORT_FILE%"
+getmac /v >> "%EXPORT_FILE%"
+echo. >> "%EXPORT_FILE%"
+
+echo [*] Network Statistics: >> "%EXPORT_FILE%"
+netstat -e >> "%EXPORT_FILE%"
+echo. >> "%EXPORT_FILE%"
+
+echo ================================================================ >> "%EXPORT_FILE%"
+echo                    End of Report >> "%EXPORT_FILE%"
+echo ================================================================ >> "%EXPORT_FILE%"
+
+echo Export complete!
+echo File saved to: %EXPORT_FILE%
+echo.
+echo Press any key to open the file...
+pause >nul
+notepad "%EXPORT_FILE%"
+goto network_scanner
 
 rem ===========================
 rem File Manager
