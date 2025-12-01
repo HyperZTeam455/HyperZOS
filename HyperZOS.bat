@@ -1,5 +1,5 @@
 @echo off
-title HyperZOS v0.1.0
+title HyperZOS v0.1.1
 color 0a
 mode con: cols=110 lines=30
 setlocal enabledelayedexpansion
@@ -12,7 +12,7 @@ echo ================================================================
 echo                       H Y P E R Z O S
 echo ================================================================
 echo.
-echo                       Version 0.1.0
+echo                       Version 0.1.1
 echo.
 echo             Loading HyperZOS Operating System...
 echo.
@@ -22,6 +22,8 @@ timeout /t 1 >nul
 
 rem ---------- HyperZOS Root ----------
 set "ROOT=%~dp0HyperZFS"
+rem ---------- SELECTION MODE ----------
+set "SELECTION_MODE=arrow"
 
 rem ---------- LOAD THEME ----------
 if exist "%ROOT%\Themes\current.txt" (
@@ -37,7 +39,7 @@ if not exist "%ROOT%" (
     mkdir "%ROOT%\Documents"
     mkdir "%ROOT%\Programs"
     mkdir "%ROOT%\Themes"
-    echo Welcome to HyperZOS v0.1.0 > "%ROOT%\Documents\welcome.txt"
+    echo Welcome to HyperZOS v0.1.1 > "%ROOT%\Documents\welcome.txt"
     echo 0a > "%ROOT%\Themes\current.txt"
 )
 
@@ -64,9 +66,14 @@ set opts[7]=Exit HyperZOS
 cls
 echo ================================================================
 echo                     HyperZOS Operating System
-echo            Version 0.1.0 - %date% - %time%
+echo            Version 0.1.1 - %date% - %time%
 echo ================================================================
 echo.
+
+rem Check selection mode
+if "!SELECTION_MODE!"=="number" goto menu_number_mode
+
+rem ---------- ARROW KEY MODE ----------
 rem Draw menu with highlight
 for /L %%i in (0,1,7) do (
     if !sel! EQU %%i (
@@ -76,11 +83,21 @@ for /L %%i in (0,1,7) do (
     )
 )
 echo.
-echo Use Up/Down arrows to navigate, Enter to select.
+echo Use Up/Down arrows to navigate, Enter to select, T to switch modes.
 
-rem Read key from PowerShell - optimized version
-for /f %%K in ('powershell -noprofile -command "$k=$host.ui.rawui.readkey('NoEcho,IncludeKeyDown');$k.virtualkeycode"') do set key=%%K
+rem Read key from PowerShell (arrow keys) - on older systems this will fail
+for /f %%K in ('powershell -noprofile -command "$k=$host.ui.rawui.readkey('NoEcho,IncludeKeyDown');if($k.Character -eq 't' -or $k.Character -eq 'T'){Write-Output 84}else{Write-Output $k.virtualkeycode}" 2^>nul') do set key=%%K
 
+rem If PowerShell failed (older systems), auto-switch to number mode
+if not defined key (
+    set "SELECTION_MODE=number"
+    goto menu
+)
+
+rem Check for T key (ASCII 84)
+if "%key%"=="84" goto toggle_selection_mode
+
+rem Handle arrow keys
 if "%key%"=="38" set /a sel-=1
 if !sel! LSS 0 set sel=7
 if "%key%"=="40" set /a sel+=1
@@ -89,16 +106,80 @@ if "%key%"=="13" goto select_option
 
 goto menu
 
-:select_option
-if !sel! EQU 0 goto fileman
-if !sel! EQU 1 goto games_menu
-if !sel! EQU 2 goto run_hyperzshell
-if !sel! EQU 3 goto hyperzpad
-if !sel! EQU 4 goto network_scanner
-if !sel! EQU 5 goto hyperzDecimal
-if !sel! EQU 6 goto themes
-if !sel! EQU 7 goto exitos
-goto menu
+rem ---------- NUMBER SELECTION MODE ----------
+:menu_number_mode
+cls
+echo ================================================================
+echo                     HyperZOS Operating System
+echo            Version 0.1.1 - %date% - %time%
+echo ================================================================
+echo.
+echo [Number Selection Mode - Compatible with all systems]
+echo.
+
+rem Draw menu with numbers
+for /L %%i in (0,1,7) do (
+    set /a display_num=%%i+1
+    echo  !display_num!. !opts[%%i]!
+)
+echo.
+echo Enter number (1-8) or T to switch modes: 
+set /p "menu_input="
+
+rem Check if T pressed
+if /i "!menu_input!"=="T" goto toggle_selection_mode
+
+rem Validate number input
+set "valid_input=0"
+for %%n in (1 2 3 4 5 6 7 8) do (
+    if "!menu_input!"=="%%n" set "valid_input=1"
+)
+
+if "!valid_input!"=="0" (
+    echo Invalid selection!
+    timeout /t 1 >nul
+    goto menu
+)
+
+rem Convert to zero-based index
+set /a sel=!menu_input!-1
+goto select_option
+
+rem ---------- TOGGLE SELECTION MODE ----------
+:toggle_selection_mode
+cls
+echo ================================================================
+echo                   Selection Mode Toggle
+echo ================================================================
+echo.
+if "!SELECTION_MODE!"=="arrow" (
+    echo Current Mode: Arrow Key Navigation
+    echo.
+    echo Switch to Number Selection Mode?
+    echo ^(Compatible with Windows 2000, Linux/Wine, macOS^)
+) else (
+    echo Current Mode: Number Selection
+    echo.
+    echo Switch to Arrow Key Navigation Mode?
+    echo ^(Requires Windows XP+ with PowerShell^)
+)
+echo.
+choice /c YN /n /m "Y - Yes, switch modes  N - No, keep current mode: "
+
+if errorlevel 2 goto menu
+if errorlevel 1 (
+    if "!SELECTION_MODE!"=="arrow" (
+        set "SELECTION_MODE=number"
+        echo.
+        echo Switched to Number Selection Mode!
+    ) else (
+        set "SELECTION_MODE=arrow"
+        echo.
+        echo Switched to Arrow Key Mode!
+    )
+    timeout /t 2 >nul
+    goto menu
+)
 
 rem ===========================
 rem Themes Manager
